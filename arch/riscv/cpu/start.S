@@ -33,6 +33,8 @@
 #define SYM_SIZE		0x18
 #endif
 
+	.option arch, +zicsr
+
 .section .data
 secondary_harts_relocation_error:
 	.ascii "Relocation of secondary harts has failed, error %d\n"

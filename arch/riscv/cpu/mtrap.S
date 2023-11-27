@@ -24,6 +24,7 @@
 #define REGBYTES	8
 #endif
 
+	.option arch, +zicsr
 	.text
 
 	/* trap entry */
