@@ -993,7 +993,7 @@ static int spinand_detect(struct spinand_device *spinand)
 	dev_info(spinand->slave->dev,
 		 "%s SPI NAND was found.\n", spinand->manufacturer->name);
 	dev_info(spinand->slave->dev,
-		 "%llu MiB, block size: %zu KiB, page size: %zu, OOB size: %u\n",
+		 "%u MiB, block size: %u KiB, page size: %u, OOB size: %u\n",
 		 nanddev_size(nand) >> 20, nanddev_eraseblock_size(nand) >> 10,
 		 nanddev_page_size(nand), nanddev_per_page_oobsize(nand));
 

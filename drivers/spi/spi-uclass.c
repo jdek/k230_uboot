@@ -375,7 +375,6 @@ int spi_get_bus_and_cs(int busnum, int cs, struct udevice **busp,
 
 	slave = dev_get_parent_priv(dev);
 	bus_data = dev_get_uclass_priv(bus);
-
 	/*
 	 * In case the operation speed is not yet established by
 	 * dm_spi_claim_bus() ensure the bus is configured properly.
@@ -550,10 +549,10 @@ int spi_slave_of_to_plat(struct udevice *dev, struct dm_spi_slave_plat *plat)
 		mode |= SPI_TX_DUAL;
 		break;
 	case 4:
-		mode |= SPI_TX_QUAD;
+		mode |= SPI_TX_QUAD | SPI_TX_DUAL;
 		break;
 	case 8:
-		mode |= SPI_TX_OCTAL;
+		mode |= SPI_TX_OCTAL | SPI_TX_QUAD | SPI_TX_DUAL;
 		break;
 	default:
 		warn_non_spl("spi-tx-bus-width %d not supported\n", value);
@@ -568,10 +567,10 @@ int spi_slave_of_to_plat(struct udevice *dev, struct dm_spi_slave_plat *plat)
 		mode |= SPI_RX_DUAL;
 		break;
 	case 4:
-		mode |= SPI_RX_QUAD;
+		mode |= SPI_RX_QUAD | SPI_RX_DUAL;
 		break;
 	case 8:
-		mode |= SPI_RX_OCTAL;
+		mode |= SPI_RX_OCTAL | SPI_RX_QUAD | SPI_RX_DUAL;
 		break;
 	default:
 		warn_non_spl("spi-rx-bus-width %d not supported\n", value);

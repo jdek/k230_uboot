@@ -5,7 +5,8 @@
  *
  * usb_match_device() modified from Linux kernel v4.0.
  */
-
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 #define LOG_CATEGORY UCLASS_USB
 
 #include <common.h>
@@ -868,3 +869,4 @@ U_BOOT_DRIVER(usb_dev_generic_drv) = {
 	.id		= UCLASS_USB_DEV_GENERIC,
 	.name		= "usb_dev_generic_drv",
 };
+#pragma GCC pop_options

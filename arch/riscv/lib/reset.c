@@ -6,7 +6,7 @@
 #include <common.h>
 #include <command.h>
 #include <hang.h>
-
+__weak
 int do_reset(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	printf("resetting ...\n");

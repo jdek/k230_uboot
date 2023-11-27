@@ -513,7 +513,7 @@ static int mmc_go_idle(struct mmc *mmc)
 	struct mmc_cmd cmd;
 	int err;
 
-	udelay(1000);
+	udelay(4000);
 
 	cmd.cmdidx = MMC_CMD_GO_IDLE_STATE;
 	cmd.cmdarg = 0;
@@ -1649,7 +1649,7 @@ static int mmc_set_bus_width(struct mmc *mmc, uint width)
 	return mmc_set_ios(mmc);
 }
 
-#if CONFIG_IS_ENABLED(MMC_VERBOSE) || defined(DEBUG)
+//#if CONFIG_IS_ENABLED(MMC_VERBOSE) //|| defined(DEBUG)
 /*
  * helper function to display the capabilities in a human
  * friendly manner. The capabilities include bus width and
@@ -1659,20 +1659,20 @@ void mmc_dump_capabilities(const char *text, uint caps)
 {
 	enum bus_mode mode;
 
-	pr_debug("%s: widths [", text);
+	printf("%s: widths [", text);
 	if (caps & MMC_MODE_8BIT)
-		pr_debug("8, ");
+		printf("8, ");
 	if (caps & MMC_MODE_4BIT)
-		pr_debug("4, ");
+		printf("4, ");
 	if (caps & MMC_MODE_1BIT)
-		pr_debug("1, ");
-	pr_debug("\b\b] modes [");
+		printf("1, ");
+	printf("\b\b] modes [");
 	for (mode = MMC_LEGACY; mode < MMC_MODES_END; mode++)
 		if (MMC_CAP(mode) & caps)
-			pr_debug("%s, ", mmc_mode_name(mode));
-	pr_debug("\b\b]\n");
+			printf("%s, ", mmc_mode_name(mode));
+	printf("\b\b]\n");
 }
-#endif
+//#endif
 
 struct mode_width_tuning {
 	enum bus_mode mode;

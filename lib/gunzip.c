@@ -71,7 +71,7 @@ int gzip_parse_header(const unsigned char *src, unsigned long len)
 	}
 	return i;
 }
-
+__weak
 int gunzip(void *dst, int dstlen, unsigned char *src, unsigned long *lenp)
 {
 	int offset = gzip_parse_header(src, *lenp);

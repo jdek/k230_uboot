@@ -218,11 +218,22 @@ EXPORT_SYMBOL_GPL(spi_mem_default_supports_op);
 bool spi_mem_supports_op(struct spi_slave *slave,
 			 const struct spi_mem_op *op)
 {
+	bool ret = false;
+	dev_dbg(slave->dev,
+               "supports:exec %02Xh %u-%u-%u addr=%llx dummy cycles=%u data bytes=%u\n",
+               op->cmd.opcode, op->cmd.buswidth, op->addr.buswidth,
+               op->data.buswidth, op->addr.val,
+               op->dummy.buswidth ? op->dummy.nbytes * 8 / op->dummy.buswidth : 0,
+               op->data.nbytes);
 	struct udevice *bus = slave->dev->parent;
 	struct dm_spi_ops *ops = spi_get_ops(bus);
 
 	if (ops->mem_ops && ops->mem_ops->supports_op)
-		return ops->mem_ops->supports_op(slave, op);
+	{
+		ret = ops->mem_ops->supports_op(slave, op);
+		dev_dbg(slave->dev, "support:%d \n", ret);
+		return ret;
+	}
 
 	return spi_mem_default_supports_op(slave, op);
 }
@@ -251,6 +262,13 @@ int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	u32 flag;
 	int ret;
 	int i;
+
+	dev_dbg(slave->dev,
+               "exec %02Xh %u-%u-%u addr=%llx dummy cycles=%u data bytes=%u\n",
+               op->cmd.opcode, op->cmd.buswidth, op->addr.buswidth,
+               op->data.buswidth, op->addr.val,
+               op->dummy.buswidth ? op->dummy.nbytes * 8 / op->dummy.buswidth : 0,
+               op->data.nbytes);
 
 	if (!spi_mem_supports_op(slave, op))
 		return -ENOTSUPP;
