@@ -82,9 +82,9 @@ char *board_fdt_chosen_bootargs(void){
     char *bootargs = env_get("bootargs");
     if(NULL == bootargs) {
         if(g_bootmod == SYSCTL_BOOT_SDIO0)
-            bootargs = "root=/dev/mmcblk0p3 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
+            bootargs = "root=/dev/mmcblk0p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
         else if(g_bootmod == SYSCTL_BOOT_SDIO1)
-            bootargs = "root=/dev/mmcblk1p3 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
+            bootargs = "root=/dev/mmcblk1p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
         else  if(g_bootmod == SYSCTL_BOOT_NORFLASH)
             //bootargs = "root=/dev/mtdblock9 rw rootwait rootfstype=jffs2 console=ttyS0,115200 earlycon=sbi";
             //bootargs = "ubi.mtd=9 rootfstype=ubifs rw root=ubi0_0 console=ttyS0,115200 earlycon=sbi";
