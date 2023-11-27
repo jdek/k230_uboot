@@ -50,7 +50,6 @@
 #include <spi.h>
 #include <nand.h>
 #include <linux/mtd/mtd.h>
-#include "sdk_autoconf.h"
 #include <linux/delay.h>
 
 static int k230_check_and_get_plain_data(firmware_head_s *pfh, ulong *pplain_addr);
