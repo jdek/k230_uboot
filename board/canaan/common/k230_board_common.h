@@ -95,7 +95,7 @@ typedef enum _en___boot_type{
 #define HD_BLK_NUM   DIV_ROUND_UP(sizeof(firmware_head_s), BLKSZ)
 
 #define RTT_SYS_IN_IMG_OFF_SEC      (10*1024*1024/BLKSZ)
-#define LINUX_SYS_IN_IMG_OFF_SEC    (30*1024*1024/BLKSZ)
+#define LINUX_SYS_IN_IMG_OFF_SEC    (4*1024*1024/BLKSZ)
 
 #define RTT_SYS_IN_SPI_NOR_OFF   CONFIG_SPI_NOR_RTTK_BASE
 #define LINUX_SYS_IN_SPI_NOR_OFF 0
