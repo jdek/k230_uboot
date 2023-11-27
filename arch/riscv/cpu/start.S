@@ -65,7 +65,7 @@ _start:
 	csrr	a0, CSR_MHARTID
 #endif
 	li t0, 0x70013
-	csrs	mcor,t0
+	csrs	0x7c2,t0 // mcor
 	/*
 	 * Save hart id and dtb pointer. The thread pointer register is not
 	 * modified by C code. It is used by secondary_hart_loop.
