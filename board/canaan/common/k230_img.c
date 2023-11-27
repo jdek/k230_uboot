@@ -528,44 +528,13 @@ static ulong get_flash_offset_by_boot_firmre_type(en_boot_sys_t sys)
     ulong offset = 0xffffffff;
     switch (sys){
 	case BOOT_SYS_LINUX:
-        #ifdef CONFIG_SPI_NOR_LK_BASE
-		offset = CONFIG_SPI_NOR_LK_BASE;
-        #endif 
-		break;
 	case BOOT_SYS_RTT:
-        #ifdef CONFIG_SPI_NOR_RTTK_BASE
-		offset = CONFIG_SPI_NOR_RTTK_BASE;
-        #endif 
-		break;
     case BOOT_QUICK_BOOT_CFG:
-        #ifdef CONFIG_SPI_NOR_QUICK_BOOT_CFG_BASE
-		offset = CONFIG_SPI_NOR_QUICK_BOOT_CFG_BASE;
-        #endif 
-		break;
     case BOOT_FACE_DB:
-        #ifdef CONFIG_SPI_NOR_FACE_DB_CFG_BASE
-		offset = CONFIG_SPI_NOR_FACE_DB_CFG_BASE;
-        #endif 
-		break;
     case BOOT_SENSOR_CFG:
-        #ifdef  CONFIG_SPI_NOR_SENSOR_CFG_CFG_BASE
-		offset = CONFIG_SPI_NOR_SENSOR_CFG_CFG_BASE;
-        #endif 
-		break;
     case BOOT_AI_MODE:
-        #ifdef CONFIG_SPI_NOR_AI_MODE_CFG_BASE
-		offset = CONFIG_SPI_NOR_AI_MODE_CFG_BASE;
-        #endif 
-		break;
     case BOOT_SPECKLE:
-        #ifdef CONFIG_SPI_NOR_SPECKLE_CFG_BASE
-		offset = CONFIG_SPI_NOR_SPECKLE_CFG_BASE;
-        #endif 
-		break;
     case BOOT_RTAPP:
-        #ifdef CONFIG_SPI_NOR_RTT_APP_BASE
-		offset = CONFIG_SPI_NOR_RTT_APP_BASE;
-        #endif 
 		break;
     case BOOT_SYS_UBOOT:
 		offset = CONFIG_SYS_SPI_U_BOOT_OFFS;
@@ -687,32 +656,7 @@ int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff)
 static int k230_img_load_boot_sys_auot_boot(en_boot_sys_t sys)
 {
     int ret = 0;
-    #if defined(CONFIG_SPI_NOR_SUPPORT_CFG_PARAM)
-    k230_img_load_boot_sys(BOOT_QUICK_BOOT_CFG);
-    k230_img_load_boot_sys(BOOT_FACE_DB);
-    k230_img_load_boot_sys(BOOT_SENSOR_CFG);
-    k230_img_load_boot_sys(BOOT_AI_MODE);
-    k230_img_load_boot_sys(BOOT_SPECKLE);
-    k230_img_load_boot_sys(BOOT_RTAPP);
-    #endif 
-
-
-    #if  defined(CONFIG_SUPPORT_RTSMART)
-    ret += k230_img_load_boot_sys(BOOT_SYS_RTT); 
-    #endif  
-
-    
-    #if  defined(CONFIG_SUPPORT_RTSMART) && !defined(CONFIG_SUPPORT_LINUX)
-    if(ret == 0)
-        while(1) udelay(100);
-    #endif 
-
-
-
-    #if  defined(CONFIG_SUPPORT_LINUX)
     ret += k230_img_load_boot_sys(BOOT_SYS_LINUX);
-    #endif 
-    
     return ret;
 }
 /**
