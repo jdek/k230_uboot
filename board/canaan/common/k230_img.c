@@ -57,44 +57,20 @@ static int k230_check_and_get_plain_data(firmware_head_s *pfh, ulong *pplain_add
 static int k230_boot_rtt_uimage(image_header_t *pUh);
 
 #define LINUX_KERNEL_IMG_MAX_SIZE  (25*1024*1024)
-
-#ifndef CONFIG_MEM_LINUX_SYS_SIZE 
-#define  CONFIG_MEM_LINUX_SYS_SIZE  CONFIG_MEM_RTT_SYS_SIZE
-#endif 
-
-#ifndef CONFIG_MEM_LINUX_SYS_BASE 
-#define  CONFIG_MEM_LINUX_SYS_BASE CONFIG_MEM_RTT_SYS_BASE
-#endif 
-
-
+#define RAM_SIZE (1 << 29)
 
 unsigned long get_CONFIG_CIPHER_ADDR(void)
 {
-    unsigned long ret=0;
-    
-    if(CONFIG_MEM_LINUX_SYS_SIZE >= 0x8000000){
-        ret = round_down( (((CONFIG_MEM_LINUX_SYS_SIZE - 0x1000000)/3) + CONFIG_MEM_LINUX_SYS_BASE ), 0x100000);//25MB
-    }else{
-        ret = round_down ((LINUX_KERNEL_IMG_MAX_SIZE + CONFIG_MEM_LINUX_SYS_BASE ), 0x100000);//25MB;
-    }
-
-    
-    return ret;
+    return round_down((RAM_SIZE - 0x1000000)/3, 0x100000);//25MB
 }
 unsigned long get_CONFIG_PLAIN_ADDR(void)
 {
-    unsigned long ret=0;
-    if(CONFIG_MEM_LINUX_SYS_SIZE >= 0x8000000){
-        ret = round_down( ((CONFIG_MEM_LINUX_SYS_SIZE - 0x1000000)/3*2) + CONFIG_MEM_LINUX_SYS_BASE , 0x100000);
-    }else {
-        ret = round_down ((CONFIG_MEM_LINUX_SYS_SIZE- 0x1000000 - LINUX_KERNEL_IMG_MAX_SIZE)/2 + CONFIG_CIPHER_ADDR, 0x100000);//25MB;
-    }
-    return ret;    
+    return round_down((RAM_SIZE - 0x1000000)/3*2, 0x100000);
 }
 
 #define USE_UBOOT_BOOTARGS 
-#define OPENSBI_DTB_ADDR ( CONFIG_MEM_LINUX_SYS_BASE +0x2000000)
-#define RAMDISK_ADDR ( CONFIG_MEM_LINUX_SYS_BASE +0x2000000 + 0X100000)
+#define OPENSBI_DTB_ADDR 0x2000000LU
+#define RAMDISK_ADDR (0x2000000LU + 0X100000)
 
 #define SUPPORT_MMC_LOAD_BOOT
 
