@@ -67,22 +67,12 @@ unsigned long get_CONFIG_PLAIN_ADDR(void)
 
 #define SUPPORT_MMC_LOAD_BOOT
 
-sysctl_boot_mode_e g_bootmod = SYSCTL_BOOT_MAX;
-
 #ifdef USE_UBOOT_BOOTARGS
 //weak function
 char *board_fdt_chosen_bootargs(void){
     char *bootargs = env_get("bootargs");
-    if(NULL == bootargs) {
-        if(g_bootmod == SYSCTL_BOOT_SDIO0)
-            bootargs = "root=/dev/mmcblk0p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
-        else if(g_bootmod == SYSCTL_BOOT_SDIO1)
-            bootargs = "root=/dev/mmcblk1p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
-        else  if(g_bootmod == SYSCTL_BOOT_NORFLASH)
-            //bootargs = "root=/dev/mtdblock9 rw rootwait rootfstype=jffs2 console=ttyS0,115200 earlycon=sbi";
-            //bootargs = "ubi.mtd=9 rootfstype=ubifs rw root=ubi0_0 console=ttyS0,115200 earlycon=sbi";
-            bootargs = "ubi.mtd=9 rootfstype=ubifs rw root=ubi0_0 console=ttyS0,115200 earlycon=sbi fw_devlink=off quiet";
-    }
+    if(NULL == bootargs)
+        bootargs = "root=/dev/mmcblk1p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
     //printf("%s\n",bootargs);
     return bootargs;
 }
@@ -339,10 +329,10 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
         return IMG_PART_NOT_EXIT;
 
     if(NULL == pblk_desc){
-        if(mmc_init_device(g_bootmod - SYSCTL_BOOT_SDIO0)) //mmc_init_device
+        if(mmc_init_device(1)) //mmc_init_device
             return 1;
 
-        mmc= find_mmc_device( g_bootmod - SYSCTL_BOOT_SDIO0 );
+        mmc = find_mmc_device(1);
         if(NULL == mmc)
             return 2;
         if(mmc_init(mmc))
@@ -371,136 +361,12 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
 }
 
 #endif  //SUPPORT_MMC_LOAD_BOOT
-static ulong get_flash_offset_by_boot_firmre_type(en_boot_sys_t sys)
-{
-    ulong offset = 0xffffffff;
-    switch (sys){
-	case BOOT_SYS_LINUX:
-	case BOOT_SYS_RTT:
-    case BOOT_QUICK_BOOT_CFG:
-    case BOOT_FACE_DB:
-    case BOOT_SENSOR_CFG:
-    case BOOT_AI_MODE:
-    case BOOT_SPECKLE:
-    case BOOT_RTAPP:
-		break;
-    case BOOT_SYS_UBOOT:
-		offset = CONFIG_SYS_SPI_U_BOOT_OFFS;
-		break;
-    default:break;
-	} 
-    return offset;
-}
-static int k230_load_sys_from_spi_nor( en_boot_sys_t sys, ulong buff)
-{
-    //g_bootmod
-    int ret = 0;
-    static struct spi_flash *boot_flash=NULL;
-    struct udevice *new, *bus_dev;
 
-    firmware_head_s *pfh = (firmware_head_s *)buff;
-    ulong off = get_flash_offset_by_boot_firmre_type(sys);//(sys == BOOT_SYS_LINUX) ? LINUX_SYS_IN_SPI_NOR_OFF : RTT_SYS_IN_SPI_NOR_OFF;
-
-    if(boot_flash == NULL){
-        /* speed and mode will be read from DT */
-        ret = spi_flash_probe_bus_cs(CONFIG_SF_DEFAULT_BUS, CONFIG_SF_DEFAULT_CS,
-                        &new);
-        if (ret) {
-            env_set_default("spi_flash_probe_bus_cs() failed", 0);
-            return ret;
-        }
-        boot_flash = dev_get_uclass_priv(new);
-    }
-
-
-    ret = spi_flash_read(boot_flash, off, sizeof(*pfh), (void *)pfh);
-
-    if(ret || (pfh->magic != MAGIC_NUM) )   {
-        K230_dbg("pfh->magic 0x%x != 0x%x off=0x%lx buff=0x%lx  ", pfh->magic, MAGIC_NUM, off, buff);
-        return 5;
-    }
-    ret = spi_flash_read(boot_flash, off+sizeof(*pfh), round_up(pfh->length,2), (void*)(buff+sizeof(*pfh)));
-
-    if(sys== BOOT_SYS_LINUX){
-        ret = spi_find_bus_and_cs(CONFIG_SF_DEFAULT_BUS, CONFIG_SF_DEFAULT_CS, &bus_dev, &new);
-        device_remove(new, DM_REMOVE_NORMAL);
-        boot_flash = NULL;
-     }
-    return ret;
-}
-static ulong get_nand_start_by_boot_firmre_type(en_boot_sys_t sys)
-{
-    ulong blk_s = IMG_PART_NOT_EXIT;
-    switch (sys){
-	case BOOT_SYS_LINUX:
-		blk_s = LINUX_SYS_IN_SPI_NAND_OFF;
-		break;
-	case BOOT_SYS_RTT:
-		blk_s = RTT_SYS_IN_SPI_NAND_OFF;
-		break;
-    case BOOT_SYS_UBOOT:
-		blk_s = CONFIG_SYS_SPI_U_BOOT_OFFS;
-		break;
-    default:break;
-	} 
-    return blk_s;
-}
-static int k230_load_sys_from_spi_nand( en_boot_sys_t sys, ulong buff)
-{
-    //g_bootmod
-    int ret = 0;
-    static struct mtd_info *boot_flash=NULL;
-    struct udevice *new, *bus_dev;
-
-    firmware_head_s *pfh = (firmware_head_s *)buff;
-    ulong off = get_nand_start_by_boot_firmre_type(sys); //(sys == BOOT_SYS_LINUX) ? LINUX_SYS_IN_SPI_NAND_OFF : RTT_SYS_IN_SPI_NAND_OFF;
-    size_t len = sizeof(*pfh);
-    size_t lenth ;
-
-    if( IMG_PART_NOT_EXIT == off)
-        return IMG_PART_NOT_EXIT;
-
-    if(boot_flash == NULL){
-        /* speed and mode will be read from DT */
-        ret = spi_flash_probe_bus_cs(CONFIG_SF_DEFAULT_BUS, CONFIG_SF_DEFAULT_CS,
-                        &new);
-        if (ret) {
-            env_set_default("spi_flash_probe_bus_cs() failed", 0);
-            return ret;
-        }
-        boot_flash = dev_get_uclass_priv(new);
-    }
-
-    ret = nand_read(boot_flash, off, &len, (void *)pfh);
-
-    if(ret || (pfh->magic != MAGIC_NUM) ){
-        K230_dbg("pfh->magic 0x%x != 0x%x off=0x%lx buff=0x%lx ", pfh->magic, MAGIC_NUM, off, buff);
-        return 5;
-    }
-
-    lenth = round_up(pfh->length,2);
-    ret = nand_read(boot_flash, off+sizeof(*pfh), &lenth, (void*)(buff+sizeof(*pfh)));
-    if(sys== BOOT_SYS_LINUX){
-        ret = spi_find_bus_and_cs(CONFIG_SF_DEFAULT_BUS, CONFIG_SF_DEFAULT_CS, &bus_dev, &new);
-        device_remove(new, DM_REMOVE_NORMAL);
-        boot_flash = NULL;
-     }
-
-    return ret;
-}
 int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff)
 {
-    int ret = 0;
-    
-    if( (g_bootmod == SYSCTL_BOOT_SDIO1) || (g_bootmod == SYSCTL_BOOT_SDIO0) ){ //sd
-        ret = k230_load_sys_from_mmc_or_sd(sys, buff);
-    }else if(g_bootmod == SYSCTL_BOOT_NANDFLASH){ //spi nand
-        ret = k230_load_sys_from_spi_nand( sys,buff);
-    }else if(g_bootmod == SYSCTL_BOOT_NORFLASH){ //spi nor
-        ret = k230_load_sys_from_spi_nor( sys,buff);
-    }
-    return ret;
+    return k230_load_sys_from_mmc_or_sd(sys, buff);
 }
+
 static int k230_img_load_boot_sys_auot_boot(en_boot_sys_t sys)
 {
     int ret = 0;

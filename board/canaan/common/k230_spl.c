@@ -44,19 +44,8 @@
 //weak
 void board_boot_order(u32 *spl_boot_list)
 {
-    if(g_bootmod ==  SYSCTL_BOOT_SDIO0){
-        spl_boot_list[0] = BOOT_DEVICE_MMC1;
-        spl_boot_list[1] = BOOT_DEVICE_MMC2;
-    }else  if(g_bootmod ==  SYSCTL_BOOT_NORFLASH){
-        spl_boot_list[0] = BOOT_DEVICE_SPI;
-        spl_boot_list[1] = BOOT_DEVICE_SPI;
-    }else  if(g_bootmod ==  SYSCTL_BOOT_NANDFLASH){
-        spl_boot_list[0] = BOOT_DEVICE_NAND;
-        spl_boot_list[1] = BOOT_DEVICE_SPI;
-    }else  if(g_bootmod ==  SYSCTL_BOOT_SDIO1){
-        spl_boot_list[0] = BOOT_DEVICE_MMC2;
-        spl_boot_list[1] = BOOT_DEVICE_MMC1;
-    }
+    spl_boot_list[0] = BOOT_DEVICE_MMC2;
+    spl_boot_list[1] = BOOT_DEVICE_MMC1;
 }
 
 //weak
@@ -113,7 +102,6 @@ int spl_board_init_f(void)
     int ret = 0;
 
     device_disable();
-    g_bootmod = sysctl_boot_get_boot_mode();
 
     record_boot_time_info_to_sram("ds");
     ddr_init_training();

@@ -42,10 +42,7 @@
 //weak
 int mmc_get_env_dev(void)
 {
-    int ret = 0;
-    if(g_bootmod ==  SYSCTL_BOOT_SDIO1)
-        ret = 1;
-    return ret;
+    return 1;
 }
 //weak
 enum env_location arch_env_get_location(enum env_operation op, int prio)
@@ -54,18 +51,11 @@ enum env_location arch_env_get_location(enum env_operation op, int prio)
         return ENVL_UNKNOWN;
     }
 
-    if(g_bootmod ==  SYSCTL_BOOT_NORFLASH){
-        return ENVL_SPI_FLASH;
-    }
-    if(g_bootmod ==  SYSCTL_BOOT_NANDFLASH){
-        return ENVL_NAND;
-    }
 	return ENVL_MMC;
 }
 #ifndef CONFIG_SPL_BUILD
 int board_early_init_f(void)
 {
-    g_bootmod = sysctl_boot_get_boot_mode(); //init  g_bootmod
     return 0;
 }
 
@@ -93,7 +83,7 @@ __weak int board_init(void)
 }
 
 static int k230_boot_prepare_args(int argc, char *const argv[], ulong buff,
-                            en_boot_sys_t *sys, sysctl_boot_mode_e *bootmod)
+                            en_boot_sys_t *sys)
 {
     ulong add_tmp ,len;
 
@@ -110,17 +100,7 @@ static int k230_boot_prepare_args(int argc, char *const argv[], ulong buff,
         }
         *sys = BOOT_SYS_ADDR;
         return 0;
-    }else  if (!strcmp(argv[1], "sd"))
-        *bootmod=SYSCTL_BOOT_SDIO1;
-    else if (!strcmp(argv[1], "emmc"))
-        *bootmod=SYSCTL_BOOT_SDIO0;
-    else if (!strcmp(argv[1], "spinor"))
-        *bootmod=SYSCTL_BOOT_NORFLASH;
-    else if (!strcmp(argv[1], "spinand"))
-        *bootmod=SYSCTL_BOOT_NANDFLASH;
-    else if (!strcmp(argv[1], "auto"))
-        *bootmod=sysctl_boot_get_boot_mode();
-
+    }
 
     if(!strcmp(argv[2], "rtt"))
         *sys = BOOT_SYS_RTT;
@@ -164,12 +144,10 @@ static int do_k230_boot(struct cmd_tbl *cmdtp, int flag, int argc,
     int ret = 0;
     ulong cipher_addr = CONFIG_CIPHER_ADDR; //加载地址、密文
     en_boot_sys_t sys;
-    sysctl_boot_mode_e bootmod = g_bootmod;
 
-    ret = k230_boot_prepare_args(argc, argv, cipher_addr,&sys, &bootmod);
+    ret = k230_boot_prepare_args(argc, argv, cipher_addr, &sys);
     if(ret)
         return ret;
-    g_bootmod = bootmod;
     if(sys == BOOT_SYS_ADDR)
         ret = k230_img_boot_sys_bin((firmware_head_s *) cipher_addr);
     else

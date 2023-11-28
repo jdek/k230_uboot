@@ -117,5 +117,4 @@ int do_timeinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[]);
 int k230_img_load_boot_sys(en_boot_sys_t sys);
 // int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff);
 int k230_img_boot_sys_bin(firmware_head_s * fhBUff);
-extern sysctl_boot_mode_e g_bootmod;
 #endif 

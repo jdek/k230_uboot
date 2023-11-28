@@ -23,8 +23,6 @@
 #  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  */
 
-obj-y += board.o
-
 obj-$(CONFIG_CANMV_LPDDR3_2133) += gen_pilpddr3_2133.o   #ddr_init_2133.c
 
 $(obj)/gen_pilpddr3_2133.c: $(src)/k230pi_ddr_init_2133.c   $(srctree)/arch/riscv/cpu/k230/ddr.sh

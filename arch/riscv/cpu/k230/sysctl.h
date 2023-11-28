@@ -29,14 +29,6 @@
 #include <asm/io.h>
 // #include "common.h"
 #define REG32(REG)  readl((const volatile void __iomem *)REG)
-typedef enum
-{
-    SYSCTL_BOOT_NORFLASH        = 0,
-    SYSCTL_BOOT_NANDFLASH       = 1,
-    SYSCTL_BOOT_SDIO0           = 2,
-    SYSCTL_BOOT_SDIO1           = 3,
-    SYSCTL_BOOT_MAX,
-}sysctl_boot_mode_e;
 
 #define DEFAULT_CPU0_CLK    (800*MHz)
 #define DEFAULT_SDIO0_CCLK  (200*MHz)
@@ -63,8 +55,4 @@ typedef enum
 #define SOC_BOOT_CTL  (SYSCTL_BOOT_BASE_ADDR + 0x40)
 #define REG_SOC_BOOT_CTL         REG32(SOC_BOOT_CTL)
 
-// typedef sysctl_boot_mode_e (*func_sysctl_boot_get_boot_mode)(void);
-
-// extern func_sysctl_boot_get_boot_mode cb_sysctl_boot_get_boot_mode;
-extern sysctl_boot_mode_e sysctl_boot_get_boot_mode(void);
 #endif
