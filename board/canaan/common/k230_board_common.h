@@ -37,7 +37,6 @@ unsigned long get_CONFIG_CIPHER_ADDR(void);
 unsigned long get_CONFIG_PLAIN_ADDR(void);
 #define CONFIG_CIPHER_ADDR  get_CONFIG_CIPHER_ADDR()
 #define CONFIG_PLAIN_ADDR   get_CONFIG_PLAIN_ADDR()
-#define CONFIG_K230_PUFS
 
 
 #define MAGIC_NUM   0x3033324B // "K230"

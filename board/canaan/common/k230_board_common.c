@@ -35,12 +35,6 @@
 #include <asm/spl.h>
 #include "sysctl.h"
 
-#include <pufs_hmac.h>
-#include <pufs_ecp.h>
-#include <pufs_rt.h>
-#include "pufs_sm2.h"
-#include <pufs_sp38a.h>
-#include <pufs_sp38d.h>
 #include <linux/kernel.h>
 #include "k230_board_common.h"
 #include <env_internal.h>

@@ -26,35 +26,6 @@
 obj-y += dram.o
 obj-y += cpu.o
 obj-y += cache.o
-obj-y += puf_fw/pufs_common/pufs_internal.o 
-obj-y += puf_fw/pufs_common/pufs_reg_ctrl.o 
-obj-y += puf_fw/pufs_crypto/pufs_crypto.o 
-obj-y += puf_fw/pufs_dma/pufs_dma.o 
-obj-y += puf_fw/pufs_ecc/pufs_ecc.o 
-obj-y += puf_fw/pufs_ecp/pufs_ecp_mprog.o 
-obj-y += puf_fw/pufs_ecp/pufs_ecp.o 
-obj-y += puf_fw/pufs_hmac/pufs_hmac.o 
-obj-y += puf_fw/pufs_ka/pufs_ka.o 
-obj-y += puf_fw/pufs_rt/pufs_rt.o 
-obj-y += puf_fw/pufs_sm2/pufs_sm2.o 
-obj-y += puf_fw/pufs_sp38a/pufs_sp38a.o 
-obj-y += puf_fw/pufs_sp38d/pufs_sp38d.o 
-
-
-
-
-
-
-
 obj-y += sysctl.o
 obj-y += unzip.o
 EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_common  
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_crypto
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_dma
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_ecc
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_ecp
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_hmac
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_ka
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_rt
-EXTRA_CFLAGS += -I$(srctree)/arch/$(ARCH)/cpu/k230/puf_fw/pufs_sm2
