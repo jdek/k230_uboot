@@ -38,21 +38,12 @@ typedef enum
     SYSCTL_BOOT_MAX,
 }sysctl_boot_mode_e;
 
-#ifdef BUILD_FPGA
-#define DEFAULT_CPU0_CLK    (50*MHz)
-#define DEFAULT_SDIO0_CCLK  (50*MHz) 
-#define DEFAULT_SDIO1_CCLK  (25*MHz)
-#define DEFAULT_OSPI_CLK    (50*MHz)
-#define DEFAULT_QSPI_CLK    (50*MHz)
-#define DEFAULT_UART_CLK    (25*MHz)
-#else
 #define DEFAULT_CPU0_CLK    (800*MHz)
 #define DEFAULT_SDIO0_CCLK  (200*MHz)
 #define DEFAULT_SDIO1_CCLK  (100*MHz)
 #define DEFAULT_OSPI_CLK    (800*MHz)
 #define DEFAULT_QSPI_CLK    (200*MHz)
 #define DEFAULT_UART_CLK    (50*MHz)
-#endif
 
 #define USB_RST_CTL             (SYSCTL_RST_BASE_ADDR + 0x3c)
 #define REG_USB_RST_CTL         REG32(USB_RST_CTL)
