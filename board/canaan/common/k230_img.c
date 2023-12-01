@@ -303,9 +303,6 @@ static ulong get_blk_start_by_boot_firmre_type(en_boot_sys_t sys)
 	case BOOT_SYS_LINUX:
 		blk_s = LINUX_SYS_IN_IMG_OFF_SEC;
 		break;
-	case BOOT_SYS_RTT:
-		blk_s = RTT_SYS_IN_IMG_OFF_SEC;
-		break;
     case BOOT_SYS_UBOOT:
 		blk_s = CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR;
 		break;
@@ -367,12 +364,6 @@ int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff)
     return k230_load_sys_from_mmc_or_sd(sys, buff);
 }
 
-static int k230_img_load_boot_sys_auot_boot(en_boot_sys_t sys)
-{
-    int ret = 0;
-    ret += k230_img_load_boot_sys(BOOT_SYS_LINUX);
-    return ret;
-}
 /**
  * @brief 
  * 
@@ -383,19 +374,12 @@ static int k230_img_load_boot_sys_auot_boot(en_boot_sys_t sys)
  */
 int k230_img_load_boot_sys(en_boot_sys_t sys)
 {
-    int ret = 0;
-
-    if(sys == BOOT_SYS_AUTO)
-        ret =  k230_img_load_boot_sys_auot_boot(sys);
-    else {
-        ret = k230_img_load_sys_from_dev(sys, CONFIG_CIPHER_ADDR);
-        if(ret){
-            if(ret != IMG_PART_NOT_EXIT)
-                printf("sys %x  load error ret=%x\n", sys, ret);
-            return ret;
-        }
-        ret = k230_img_boot_sys_bin((firmware_head_s * )CONFIG_CIPHER_ADDR);
+    int ret = k230_img_load_sys_from_dev(sys, CONFIG_CIPHER_ADDR);
+    if (ret) {
+        if (ret != IMG_PART_NOT_EXIT)
+            printf("sys %x  load error ret=%x\n", sys, ret);
+        return ret;
     }
-    return ret;
+    return k230_img_boot_sys_bin((firmware_head_s * )CONFIG_CIPHER_ADDR);
 }
 

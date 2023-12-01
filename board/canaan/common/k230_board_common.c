@@ -102,30 +102,11 @@ static int k230_boot_prepare_args(int argc, char *const argv[], ulong buff,
         return 0;
     }
 
-    if(!strcmp(argv[2], "rtt"))
-        *sys = BOOT_SYS_RTT;
-    else if (!strcmp(argv[2], "linux"))
+    if (!strcmp(argv[2], "linux"))
         *sys=BOOT_SYS_LINUX;
-    else if (!strcmp(argv[2], "qbc"))
-        *sys=BOOT_QUICK_BOOT_CFG;
-    else if (!strcmp(argv[2], "fdb"))
-        *sys=BOOT_FACE_DB;
-    else if (!strcmp(argv[2], "sensor"))
-        *sys=BOOT_SENSOR_CFG;
-    else if (!strcmp(argv[2], "ai"))
-        *sys=BOOT_AI_MODE;
-    else if (!strcmp(argv[2], "speckle"))
-        *sys=BOOT_SPECKLE;
-    else if (!strcmp(argv[2], "rtapp"))
-        *sys=BOOT_RTAPP;
     else if (!strcmp(argv[2], "uboot"))
         *sys=BOOT_SYS_UBOOT;
-    else if (!strcmp(argv[2], "auto_boot"))
-        *sys=BOOT_SYS_AUTO;
-
-
     return 0;
-
 }
 
 
@@ -155,14 +136,7 @@ static int do_k230_boot(struct cmd_tbl *cmdtp, int flag, int argc,
     return ret;
 }
 
-#define K230_BOOT_HELP  " <auto|sd|emmc|spinor|spinand|mem> <auto_boot|rtt|linux|qbc|fdb|sensor|ai|speckle|rtapp|uboot|addr> [len]\n" \
-                        "qbc---quick boot cfg\n" \
-                        "fdb---face database\n" \
-                        "sensor---sensor cfg\n" \
-                        "ai---ai mode cfg\n" \
-                        "speckle---speckle cfg\n" \
-                        "rtapp---rtt app\n" \
-                        "auto_boot---auto boot\n" \
+#define K230_BOOT_HELP  " <auto|mem> <linux|uboot|addr> [len]\n" \
                         "uboot---boot uboot\n"
 /*
 boot sd/mmc/spinor/spinand/mem  add
