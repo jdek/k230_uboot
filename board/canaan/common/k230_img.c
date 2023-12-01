@@ -46,7 +46,6 @@
 #include <linux/mtd/mtd.h>
 #include <linux/delay.h>
 
-static int k230_check_and_get_plain_data(firmware_head_s *pfh, ulong *pplain_addr);
 static int k230_boot_rtt_uimage(image_header_t *pUh);
 
 #define LINUX_KERNEL_IMG_MAX_SIZE  (25*1024*1024)
@@ -232,23 +231,10 @@ static int k230_boot_uboot_uimage(image_header_t *pUh)
     }
     return 0;
 }
-int k230_img_boot_sys_bin(firmware_head_s * fhBUff)
+int k230_img_boot_sys_bin(image_header_t *pUh)
 {
     int ret = 0;
-    image_header_t * pUh = NULL;
-    ulong plain_addr  = 0;
 
-    //解密
-    //record_boot_time_info("ds");
-    ret = k230_check_and_get_plain_data((firmware_head_s *)fhBUff,  &plain_addr);
-    if (ret )
-        return ret;
-
-    pUh = (image_header_t *) (plain_addr + 4);//4字节是版本号
-    if (!image_check_magic(pUh)){
-        printf("bad magic \n");
-        return -3;
-    }        
     //解压缩，引导；
      if ( (0 == strcmp(image_get_name(pUh), "linux") ) || (0 == strcmp(image_get_name(pUh), "Linux") ) ){ 
         ret = k230_boot_linux_uimage(pUh);
@@ -261,35 +247,6 @@ int k230_img_boot_sys_bin(firmware_head_s * fhBUff)
         return 0;
     }
     return 0;
-}
-
-//去掉k230 fireware头信息，完整性校验，解密；
-static int k230_check_and_get_plain_data(firmware_head_s *pfh, ulong *pplain_addr)
-{
-
-    uint32_t otp_msc = 0;    
-    int ret = 0;
-
-    if(pfh->magic != MAGIC_NUM){
-        printf("magic error %x : %x \n", MAGIC_NUM, pfh->magic);
-        return CMD_RET_FAILURE;
-    }
-
-    if(pfh->crypto_type == NONE_SECURITY){ 
-        if(otp_msc & 0x1){
-            printf(" NONE_SECURITY not support  %x \n", pfh->crypto_type);
-            return -5;
-        }       
-        if(pplain_addr) 
-            *pplain_addr = (ulong)pfh + sizeof(*pfh) ; 
-
-        ret = 0;    
-    } else  {
-        printf("error crypto type =%x\n", pfh->crypto_type);
-        return -9;
-    } 
-
-    return ret;
 }
 
 //mmc
@@ -319,7 +276,7 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
     ulong blk_s  = get_blk_start_by_boot_firmre_type(sys);
     struct mmc * mmc=NULL;
     int ret = 0;
-    firmware_head_s *pfh = (firmware_head_s *)buff;
+    image_header_t *pUh = (void *)buff;
     ulong data_sect = 0;
 
     if( IMG_PART_NOT_EXIT == blk_s )
@@ -344,12 +301,12 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
     if(ret != HD_BLK_NUM)
         return 4;
 
-    if(pfh->magic != MAGIC_NUM){
-        K230_dbg("pfh->magic 0x%x != 0x%x blk=0x%lx buff=0x%lx  ", pfh->magic, MAGIC_NUM, blk_s, buff);
+    if (!image_check_magic(pUh)) {
+        printf("bad magic blk=0x%lx buff=0x%lx", blk_s, buff);
         return 5;
     }
 
-    data_sect = DIV_ROUND_UP(pfh->length + sizeof(*pfh), BLKSZ) - HD_BLK_NUM;
+    data_sect = DIV_ROUND_UP(image_get_image_size(pUh), BLKSZ) - HD_BLK_NUM;
 	
     ret = blk_dread(pblk_desc, blk_s + HD_BLK_NUM, data_sect, (char *)buff + HD_BLK_NUM * BLKSZ);
     if(ret != data_sect)
@@ -380,6 +337,6 @@ int k230_img_load_boot_sys(en_boot_sys_t sys)
             printf("sys %x  load error ret=%x\n", sys, ret);
         return ret;
     }
-    return k230_img_boot_sys_bin((firmware_head_s * )CONFIG_CIPHER_ADDR);
+    return k230_img_boot_sys_bin(CONFIG_CIPHER_ADDR);
 }
 

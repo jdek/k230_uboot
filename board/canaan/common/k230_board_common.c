@@ -130,7 +130,7 @@ static int do_k230_boot(struct cmd_tbl *cmdtp, int flag, int argc,
     if(ret)
         return ret;
     if(sys == BOOT_SYS_ADDR)
-        ret = k230_img_boot_sys_bin((firmware_head_s *) cipher_addr);
+        ret = k230_img_boot_sys_bin((image_header_t *) cipher_addr);
     else
         ret = k230_img_load_boot_sys(sys);
     return ret;
