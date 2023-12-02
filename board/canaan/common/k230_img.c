@@ -331,6 +331,6 @@ int k230_img_load_boot_sys(en_boot_sys_t sys)
             printf("sys %x  load error ret=%x\n", sys, ret);
         return ret;
     }
-    return k230_img_boot_sys_bin(CONFIG_CIPHER_ADDR);
+    return k230_img_boot_sys_bin((void *)CONFIG_CIPHER_ADDR);
 }
 
