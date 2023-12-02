@@ -111,10 +111,8 @@ int spl_board_init_f(void)
     memset(__bss_start, 0, (ulong)&__bss_end - (ulong)__bss_start);
     //record_boot_time_info_to_sram("be");
 
-   
-
     // /* load/boot image from boot device */
-    ret = k230_img_load_boot_sys(BOOT_SYS_UBOOT);
+    ret = k230_img_load_uboot();
     if(ret )
         printf("uboot boot failed\n");
     //while(1);

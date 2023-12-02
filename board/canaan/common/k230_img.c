@@ -46,18 +46,11 @@
 #include <linux/mtd/mtd.h>
 #include <linux/delay.h>
 
-static int k230_boot_rtt_uimage(image_header_t *pUh);
-
-#define LINUX_KERNEL_IMG_MAX_SIZE  (25*1024*1024)
 #define RAM_SIZE (1 << 29)
 
 unsigned long get_CONFIG_CIPHER_ADDR(void)
 {
     return round_down((RAM_SIZE - 0x1000000)/3, 0x100000);//25MB
-}
-unsigned long get_CONFIG_PLAIN_ADDR(void)
-{
-    return round_down((RAM_SIZE - 0x1000000)/3*2, 0x100000);
 }
 
 #define USE_UBOOT_BOOTARGS 
@@ -117,82 +110,7 @@ static int  de_reset_big_core(ulong core_run_addr)
     //printf("reset big hart\n");
     return 0;
 }
-/**
- * @brief 
- * 
- * @param pUh  image_header_t *
- * @return int 
- */
-static int k230_boot_rtt_uimage(image_header_t *pUh)
-{
-    int ret = 0;
-    //小核是0，大核是1；
-    ulong len = image_get_size(pUh);
-    ulong data;
 
-    image_multi_getimg(pUh, 0, &data, &len);
-    ret = k230_boot_decomp_to_load_addr(pUh, 0x6000000, data, &len );
-    if( ret == 0){
-        de_reset_big_core(image_get_load(pUh));
-    }
-    return 0;
-}
-
-static int k230_boot_linux_uimage(image_header_t *pUh)
-{
-    int ret = 0;
-    void (*kernel)(ulong hart, void *dtb);
-
-    //小核是0，大核是1；
-    ulong len = image_get_size(pUh);
-    ulong data;
-    ulong dtb;
-    ulong img_load_addr = 0;
-
-
-    //record_boot_time_info("gd");
-    image_multi_getimg(pUh, 0, &data, &len);
-    img_load_addr = (ulong)image_get_load(pUh);
-
-    ret = k230_boot_decomp_to_load_addr(pUh, (ulong)pUh-img_load_addr,  data, &len );
-    if( ret == 0){
-          //dtb
-        image_multi_getimg(pUh, 1, &dtb, &len);
-        #ifdef USE_UBOOT_BOOTARGS
-        len = fdt_shrink_to_minimum((void*)dtb,0x100);
-        ret = fdt_chosen((void*)dtb);
-        #endif 
-        memmove((void*)OPENSBI_DTB_ADDR, (void *)dtb, len);
-
-        #ifndef CONFIG_SPL_BUILD
-        //run_command("fdt addr 0x91e7000;fdt print;", 0);
-        #endif 
-
-        K230_dbg("dtb %lx l=%lx %lx ci%lx %lx \n", dtb, data, OPENSBI_DTB_ADDR, get_CONFIG_CIPHER_ADDR(),get_CONFIG_PLAIN_ADDR());
-
-        cleanup_before_linux();//flush cache，
-        kernel = (void (*)(ulong, void *))img_load_addr;
-        //do_timeinfo(0,0,0,0); 
-        kernel(0, (void*)OPENSBI_DTB_ADDR);
-
-    }
-    return ret;
-}
-/**
- * @brief 
- * 
- * @param pUh  image_header_t *
- * @return int 
- */
-static int k230_boot_paramter_uimage(image_header_t *pUh)
-{
-    int ret = 0;
-    ulong len = image_get_data_size(pUh);
-    ulong data = image_get_data(pUh);
-
-    ret = k230_boot_decomp_to_load_addr(pUh, 0x6000000,  data, &len );
-    return ret;
-}
 /**
  * @brief 
  * 
@@ -225,58 +143,20 @@ static int k230_boot_uboot_uimage(image_header_t *pUh)
     }
     return 0;
 }
-int k230_img_boot_sys_bin(image_header_t *pUh)
-{
-    int ret = 0;
-
-    //解压缩，引导；
-     if ( (0 == strcmp(image_get_name(pUh), "linux") ) || (0 == strcmp(image_get_name(pUh), "Linux") ) ){ 
-        ret = k230_boot_linux_uimage(pUh);
-    }else if(0 == strcmp(image_get_name(pUh), "rtt")){        
-        ret = k230_boot_rtt_uimage(pUh);       
-    }else if(0 == strcmp(image_get_name(pUh), "uboot")){        
-        ret = k230_boot_uboot_uimage(pUh);       
-    } else  {        
-        k230_boot_paramter_uimage(pUh);
-        return 0;
-    }
-    return 0;
-}
 
 //mmc
 
 
 #ifdef SUPPORT_MMC_LOAD_BOOT
-static ulong get_blk_start_by_boot_firmre_type(en_boot_sys_t sys)
+static int k230_load_uboot_from_mmc_or_sd(ulong buff)
 {
-    ulong blk_s = IMG_PART_NOT_EXIT;
-    switch (sys){
-	case BOOT_SYS_LINUX:
-		blk_s = LINUX_SYS_IN_IMG_OFF_SEC;
-		break;
-    case BOOT_SYS_UBOOT:
-		blk_s = CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR;
-		break;
-    default:break;
-	} 
-    return blk_s;
-}
-
-//dev ,linux ,buff
-//sysctl_boot_mode_e bmode, en_boot_sys_t sys, ulong buff
-static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong offset ,ulong buff)
-{
-    static struct blk_desc *pblk_desc = NULL;
-    ulong blk_s  = get_blk_start_by_boot_firmre_type(sys);
-    struct mmc * mmc=NULL;
+    static struct blk_desc *pblk_desc;
+    ulong blk_s = CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR;
+    struct mmc *mmc;
     int ret = 0;
     image_header_t *pUh = (void *)buff;
     ulong data_sect = 0;
 
-    if( IMG_PART_NOT_EXIT == blk_s )
-        return IMG_PART_NOT_EXIT;
-
-    if(NULL == pblk_desc){
         if(mmc_init_device(1)) //mmc_init_device
             return 1;
 
@@ -289,7 +169,6 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
         pblk_desc = mmc_get_blk_desc(mmc);
         if(NULL == pblk_desc)
             return 3;
-    }
 
     ret = blk_dread(pblk_desc, blk_s , HD_BLK_NUM, (char *)buff);
     if(ret != HD_BLK_NUM)
@@ -310,27 +189,12 @@ static int k230_load_sys_from_mmc_or_sd(en_boot_sys_t sys, ulong buff)//(ulong o
 
 #endif  //SUPPORT_MMC_LOAD_BOOT
 
-int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff)
+int k230_img_load_uboot(void)
 {
-    return k230_load_sys_from_mmc_or_sd(sys, buff);
-}
-
-/**
- * @brief 
- * 
- * @param bmode 
- * @param sys 
- * @param buff 
- * @return int 
- */
-int k230_img_load_boot_sys(en_boot_sys_t sys)
-{
-    int ret = k230_img_load_sys_from_dev(sys, CONFIG_CIPHER_ADDR);
+    int ret = k230_load_uboot_from_mmc_or_sd(CONFIG_CIPHER_ADDR);
     if (ret) {
-        if (ret != IMG_PART_NOT_EXIT)
-            printf("sys %x  load error ret=%x\n", sys, ret);
+        printf("u-boot load error ret=%x\n", ret);
         return ret;
     }
-    return k230_img_boot_sys_bin((void *)CONFIG_CIPHER_ADDR);
+    return k230_boot_uboot_uimage((void *)CONFIG_CIPHER_ADDR);
 }
-

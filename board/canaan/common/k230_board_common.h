@@ -38,22 +38,8 @@ unsigned long get_CONFIG_PLAIN_ADDR(void);
 #define CONFIG_CIPHER_ADDR  get_CONFIG_CIPHER_ADDR()
 #define CONFIG_PLAIN_ADDR   get_CONFIG_PLAIN_ADDR()
 
-typedef enum _en___boot_type{
-	BOOT_SYS_LINUX,  
-	BOOT_SYS_UBOOT,  
-    BOOT_SYS_ADDR,
-} en_boot_sys_t;
-
 #define BLKSZ 512
 #define HD_BLK_NUM   DIV_ROUND_UP(sizeof(image_header_t), BLKSZ)
-
-#define LINUX_SYS_IN_IMG_OFF_SEC    (4*1024*1024/BLKSZ)
-
-#define LINUX_SYS_IN_SPI_NOR_OFF 0
-
-#define LINUX_SYS_IN_SPI_NAND_OFF 0x00a00000
-
-#define IMG_PART_NOT_EXIT 0XFFFFFFFF
 
 void ddr_init_training(void);
 
@@ -63,9 +49,5 @@ void record_boot_time_info_to_sram(char *prompt);
 void record_boot_time_info(char *prompt);
 int do_timeinfo(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[]);
 
-
-
-int k230_img_load_boot_sys(en_boot_sys_t sys);
-// int k230_img_load_sys_from_dev(en_boot_sys_t sys, ulong buff);
-int k230_img_boot_sys_bin(image_header_t *);
+int k230_img_load_uboot(void);
 #endif 
