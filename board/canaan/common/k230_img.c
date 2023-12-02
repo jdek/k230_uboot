@@ -62,7 +62,6 @@ unsigned long get_CONFIG_PLAIN_ADDR(void)
 
 #define USE_UBOOT_BOOTARGS 
 #define OPENSBI_DTB_ADDR 0x2000000LU
-#define RAMDISK_ADDR (0x2000000LU + 0X100000)
 
 #define SUPPORT_MMC_LOAD_BOOT
 
@@ -148,7 +147,6 @@ static int k230_boot_linux_uimage(image_header_t *pUh)
     ulong len = image_get_size(pUh);
     ulong data;
     ulong dtb;
-    ulong rd,rd_len;
     ulong img_load_addr = 0;
 
 
@@ -159,8 +157,7 @@ static int k230_boot_linux_uimage(image_header_t *pUh)
     ret = k230_boot_decomp_to_load_addr(pUh, (ulong)pUh-img_load_addr,  data, &len );
     if( ret == 0){
           //dtb
-        image_multi_getimg(pUh, 2, &dtb, &len);
-        image_multi_getimg(pUh, 1, &rd, &rd_len);
+        image_multi_getimg(pUh, 1, &dtb, &len);
         #ifdef USE_UBOOT_BOOTARGS
         len = fdt_shrink_to_minimum((void*)dtb,0x100);
         ret = fdt_chosen((void*)dtb);
@@ -171,10 +168,7 @@ static int k230_boot_linux_uimage(image_header_t *pUh)
         //run_command("fdt addr 0x91e7000;fdt print;", 0);
         #endif 
 
-        if(rd_len > 0x100 )
-            memmove((void*)RAMDISK_ADDR, (void *)rd, rd_len);
-
-        K230_dbg("dtb %lx rd=%lx l=%lx  %lx %lx ci%lx %lx \n", dtb,rd, data, OPENSBI_DTB_ADDR, RAMDISK_ADDR, get_CONFIG_CIPHER_ADDR(),get_CONFIG_PLAIN_ADDR());
+        K230_dbg("dtb %lx l=%lx %lx ci%lx %lx \n", dtb, data, OPENSBI_DTB_ADDR, get_CONFIG_CIPHER_ADDR(),get_CONFIG_PLAIN_ADDR());
 
         cleanup_before_linux();//flush cache，
         kernel = (void (*)(ulong, void *))img_load_addr;
