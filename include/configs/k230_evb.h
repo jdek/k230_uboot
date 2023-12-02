@@ -45,7 +45,6 @@
 	"scriptaddr=0x2200000\0" \
 	"ramdisk_addr_r=0x2300000\0" \
 	"kernel_addr_r=0x4100000\0" \
-	"fdtfile=k230.dtb\0" \
 	BOOTENV \
 	"bootcmd=k230_boot auto linux; \0" \
 	"\0"
