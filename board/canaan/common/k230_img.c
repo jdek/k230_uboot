@@ -53,21 +53,10 @@ unsigned long get_CONFIG_CIPHER_ADDR(void)
     return round_down((RAM_SIZE - 0x1000000)/3, 0x100000);//25MB
 }
 
-#define USE_UBOOT_BOOTARGS 
 #define OPENSBI_DTB_ADDR 0x2000000LU
 
 #define SUPPORT_MMC_LOAD_BOOT
 
-#ifdef USE_UBOOT_BOOTARGS
-//weak function
-char *board_fdt_chosen_bootargs(void){
-    char *bootargs = env_get("bootargs");
-    if(NULL == bootargs)
-        bootargs = "root=/dev/mmcblk1p6 loglevel=8 rw rootdelay=4 rootfstype=ext4 console=ttyS0,115200 crashkernel=256M-:128M earlycon=sbi";
-    //printf("%s\n",bootargs);
-    return bootargs;
-}
-#endif 
 static int k230_boot_decomp_to_load_addr(image_header_t *pUh, ulong des_len, ulong data , ulong *plen)
 {
     int ret = 0;
